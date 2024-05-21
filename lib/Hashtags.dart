@@ -74,17 +74,17 @@ class _HashtagsState extends State<Hashtags> {
             ),
             SizedBox(height: 12),
             // Small Headers
-            _buildHashtagType("Type A", "8,811 tags", "Trending in Malaysia"),
+            _buildHashtagType(context, "Type A", "8,811 tags", "Trending in Malaysia"),
             _buildDivider(),
-            _buildHashtagType("Type B", "8,812 tags", "Trending in Brunei"),
+            _buildHashtagType(context, "Type B", "8,812 tags", "Trending in Brunei"),
             _buildDivider(),
-            _buildHashtagType("Type C", "8,813 tags", "Trending in China"),
+            _buildHashtagType(context, "Type C", "8,813 tags", "Trending in China"),
             _buildDivider(),
-            _buildHashtagType("Type D", "8,814 tags", "Trending in Singapore"),
+            _buildHashtagType(context, "Type D", "8,814 tags", "Trending in Singapore"),
             _buildDivider(),
-            _buildHashtagType("Type E", "8,815 tags", "Trending in France"),
+            _buildHashtagType(context, "Type E", "8,815 tags", "Trending in France"),
             _buildDivider(),
-            _buildHashtagType("Type F", "8,816 tags", "Trending in Italy"),
+            _buildHashtagType(context, "Type F", "8,816 tags", "Trending in Italy"),
             _buildDivider(),
           ],
         ),
@@ -157,7 +157,7 @@ class _HashtagsState extends State<Hashtags> {
     );
   }
 
-  Widget _buildHashtagType(String type, String tags, String trending) {
+  Widget _buildHashtagType(BuildContext context, String type, String tags, String trending) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -189,7 +189,10 @@ class _HashtagsState extends State<Hashtags> {
             ),
           ],
         ),
-        Icon(Icons.more_vert, size: 24), // MoreVert icon
+        IconButton(
+          icon: Icon(Icons.more_vert, size: 24),
+          onPressed: () => _showPopup(context),
+        ),
       ],
     );
   }
@@ -199,6 +202,38 @@ class _HashtagsState extends State<Hashtags> {
       color: Colors.grey,
       thickness: 1,
       height: 20,
+    );
+  }
+
+  void _showPopup(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text("Feedback"),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.thumb_up, color: Colors.green),
+                title: Text("Do you like seeing this"),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  // Handle the thumbs up action
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.thumb_down, color: Colors.red),
+                title: Text("Do you dislike seeing this"),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  // Handle the thumbs down action
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

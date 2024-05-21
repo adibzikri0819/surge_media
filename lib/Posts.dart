@@ -16,6 +16,52 @@ class Posts extends StatefulWidget {
 
 class _PostsState extends State<Posts> {
   String selectedButton = 'Posts';
+  List<Map<String, String>> posts = List.generate(10, (index) => _generatePost(index));
+  ScrollController _scrollController = ScrollController();
+  bool isLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels == _scrollController.position.maxScrollExtent) {
+        _loadMorePosts();
+      }
+    });
+  }
+
+  Future<void> _loadMorePosts() async {
+    if (!isLoading) {
+      setState(() {
+        isLoading = true;
+      });
+
+      await Future.delayed(Duration(seconds: 2));
+
+      List<Map<String, String>> newPosts = List.generate(10, (index) => _generatePost(posts.length + index));
+      setState(() {
+        posts.addAll(newPosts);
+        isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  static Map<String, String> _generatePost(int index) {
+    return {
+      'profileImage': index % 2 == 0 ? 'assets/WomanPic1.jpg' : 'assets/ManPic1.jpg',
+      'userName': index % 2 == 0 ? 'Alice Swole' : 'John Doe',
+      'postImage': index % 2 == 0 ? 'assets/MoonStuffs.jpg' : 'assets/SkyGraffiti.jpg',
+      'postText': index % 2 == 0 ? 'When life gives you lemonade, don’t make lemonade.' : 'Enjoying the beautiful sunset!',
+      'commentText': '${200 + index} comments',
+      'likeText': 'You and ${500 + index * 2} others',
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,34 +71,27 @@ class _PostsState extends State<Posts> {
       ),
       body: Stack(
         children: [
-          // Positioned Rectangle with Drop Shadow
           Positioned(
             top: 250,
             left: 20,
             right: 20,
             bottom: 0,
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  _buildPostItem(
-                    'assets/WomanPic1.jpg',
-                    'Alice Swole',
-                    'assets/MoonStuffs.jpg',
-                    'When life gives you lemonade, don’t make lemonade.',
-                    '200 comments',
-                    'You and 500 others',
-                  ),
-                  _buildPostItem(
-                    'assets/ManPic1.jpg',
-                    'John Doe',
-                    'assets/SkyGraffiti.jpg',
-                    'Enjoying the beautiful sunset!',
-                    '150 comments',
-                    'You and 300 others',
-                  ),
-                  // Add more duplicated items here
-                ],
-              ),
+            child: ListView.builder(
+              controller: _scrollController,
+              itemCount: posts.length + 1,
+              itemBuilder: (context, index) {
+                if (index == posts.length) {
+                  return isLoading ? Center(child: CircularProgressIndicator()) : SizedBox.shrink();
+                }
+                return _buildPostItem(
+                  posts[index]['profileImage']!,
+                  posts[index]['userName']!,
+                  posts[index]['postImage']!,
+                  posts[index]['postText']!,
+                  posts[index]['commentText']!,
+                  posts[index]['likeText']!,
+                );
+              },
             ),
           ),
           Padding(
@@ -60,58 +99,13 @@ class _PostsState extends State<Posts> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Search Box
-                Container(
-                  padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-                  decoration: BoxDecoration(
-                    color: Color(0xFFF6F6F6),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(Icons.search, size: 16), // Magnifying glass icon
-                      SizedBox(width: 8),
-                      Text(
-                        "Search Anything",
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+                _buildSearchBox(),
                 SizedBox(height: 12),
-                // Buttons Row
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    _buildButton(context, 'Explore'),
-                    _buildButton(context, 'Users'),
-                    _buildButton(context, 'Hashtags'),
-                    _buildButton(context, 'Posts'),
-                    _buildButton(context, 'Events'),
-                  ],
-                ),
+                _buildButtonsRow(),
                 SizedBox(height: 12),
-                // Horizontal Line
                 Divider(color: Colors.grey),
                 SizedBox(height: 12),
-                // Wrapped Circles with Images and Names
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildCircleWithOuterCircle('+', 'You'),
-                    SizedBox(width: 8),
-                    _buildCircleWithInnerCircle('assets/WomanPic1.jpg', 'Alice Wonder', outerStrokeColor: Colors.blue, innerStrokeColor: Colors.grey),
-                    SizedBox(width: 8),
-                    _buildCircleWithInnerCircle('assets/ManPic1.jpg', 'Zack Fair', outerStrokeColor: Colors.blue, innerStrokeColor: Colors.grey),
-                    SizedBox(width: 8),
-                    _buildCircleWithInnerCircle('assets/ManPic1.jpg', 'Cloud Strife', outerStrokeColor: Colors.blue, innerStrokeColor: Colors.grey),
-                    SizedBox(width: 8),
-                    _buildCircleWithInnerCircle('assets/WomanPic2.jpg', 'Aerith', outerStrokeColor: Colors.grey, innerStrokeColor: Colors.grey),
-                  ],
-                ),
+                _buildCircleRow(),
               ],
             ),
           ),
@@ -120,14 +114,60 @@ class _PostsState extends State<Posts> {
     );
   }
 
-  Widget _buildPostItem(
-      String profileImage,
-      String userName,
-      String postImage,
-      String postText,
-      String commentText,
-      String likeText,
-      ) {
+  Widget _buildSearchBox() {
+    return Container(
+      padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+      decoration: BoxDecoration(
+        color: Color(0xFFF6F6F6),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.search, size: 16),
+          SizedBox(width: 8),
+          Text(
+            "Search Anything",
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildButtonsRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        _buildButton(context, 'Explore'),
+        _buildButton(context, 'Users'),
+        _buildButton(context, 'Hashtags'),
+        _buildButton(context, 'Posts'),
+        _buildButton(context, 'Events'),
+      ],
+    );
+  }
+
+  Widget _buildCircleRow() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+      children: [
+        _buildCircleWithOuterCircle('+', 'You'),
+        SizedBox(width: 8),
+        _buildCircleWithInnerCircle('assets/WomanPic1.jpg', 'Alice Wonder', outerStrokeColor: Colors.blue, innerStrokeColor: Colors.grey),
+        SizedBox(width: 8),
+        _buildCircleWithInnerCircle('assets/ManPic1.jpg', 'Zack Fair', outerStrokeColor: Colors.blue, innerStrokeColor: Colors.grey),
+        SizedBox(width: 8),
+        _buildCircleWithInnerCircle('assets/ManPic1.jpg', 'Cloud Strife', outerStrokeColor: Colors.blue, innerStrokeColor: Colors.grey),
+        SizedBox(width: 8),
+        _buildCircleWithInnerCircle('assets/WomanPic2.jpg', 'Aerith', outerStrokeColor: Colors.grey, innerStrokeColor: Colors.grey),
+      ],
+    );
+  }
+
+  Widget _buildPostItem(String profileImage, String userName, String postImage, String postText, String commentText, String likeText) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -145,7 +185,10 @@ class _PostsState extends State<Posts> {
                 style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
               Spacer(),
-              Icon(Icons.more_vert),
+              IconButton(
+                icon: Icon(Icons.more_vert),
+                onPressed: () => _showOptions(context),
+              ),
             ],
           ),
           SizedBox(height: 10),
@@ -185,6 +228,36 @@ class _PostsState extends State<Posts> {
           ),
         ],
       ),
+    );
+  }
+
+  void _showOptions(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) {
+        return Container(
+          padding: EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: Icon(Icons.thumb_up),
+                title: Text('Do you like seeing this'),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+              ListTile(
+                leading: Icon(Icons.thumb_down),
+                title: Text('Do you dislike seeing this'),
+                onTap: () {
+                  Navigator.pop(context);
+                },
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -278,12 +351,12 @@ class _PostsState extends State<Posts> {
                 ),
                 child: icon == '+'
                     ? Center(
-                  child: Icon(
-                    Icons.add,
-                    size: 24,
-                    color: Colors.black,
-                  ),
-                )
+                        child: Icon(
+                          Icons.add,
+                          size: 24,
+                          color: Colors.black,
+                        ),
+                      )
                     : null,
               ),
             ),
@@ -323,9 +396,9 @@ class _PostsState extends State<Posts> {
                 ),
                 child: image != null
                     ? CircleAvatar(
-                  radius: 20,
-                  backgroundImage: AssetImage(image),
-                )
+                        radius: 20,
+                        backgroundImage: AssetImage(image),
+                      )
                     : null,
               ),
             ),

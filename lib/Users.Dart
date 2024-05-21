@@ -11,8 +11,28 @@ class Users extends StatefulWidget {
   _UsersState createState() => _UsersState();
 }
 
+class Friend {
+  String name;
+  String imagePath;
+  bool requestSent;
+
+  Friend(this.name, this.imagePath, {this.requestSent = false});
+}
+
 class _UsersState extends State<Users> {
   String selectedButton = 'Users';
+
+  List<Friend> friends = [
+    Friend('Person A', 'assets/Refined.jpg'),
+    Friend('Person B', 'assets/MoonStuffs.jpg'),
+    Friend('Person C', 'assets/CrowdMusicParty.jpg'),
+    Friend('Person D', 'assets/RockBand.jpg'),
+    Friend('Person E', 'assets/SkyGraffiti.jpg'),
+    Friend('Person F', 'assets/SkyGraffiti.jpg'),
+    Friend('Person G', 'assets/SkyGraffiti.jpg'),
+    Friend('Person H', 'assets/SkyGraffiti.jpg'),
+    Friend('Person I', 'assets/SkyGraffiti.jpg'),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -22,90 +42,62 @@ class _UsersState extends State<Users> {
       ),
       body: SingleChildScrollView(
         child: Padding(
-padding: const EdgeInsets.all(8.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Search Box
-            Container(
-              padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
-              decoration: BoxDecoration(
-                color: Color(0xFFF6F6F6),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.search, size: 16), // Reduced size of the search icon
-                  SizedBox(width: 8),
-                  Text(
-                    "Search Anything",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey,
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Search Box
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+                decoration: BoxDecoration(
+                  color: Color(0xFFF6F6F6),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Row(
+                  children: [
+                    Icon(Icons.search, size: 16), // Reduced size of the search icon
+                    SizedBox(width: 8),
+                    Text(
+                      "Search Anything",
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey,
+                      ),
                     ),
-                  ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 12),
+              // Buttons Row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildButton(context, 'Explore'),
+                  _buildButton(context, 'Users'),
+                  _buildButton(context, 'Hashtags'),
+                  _buildButton(context, 'Posts'),
+                  _buildButton(context, 'Events'),
                 ],
               ),
-            ),
-            SizedBox(height: 12),
-            // Buttons Row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                _buildButton(context, 'Explore'),
-                _buildButton(context, 'Users'),
-                _buildButton(context, 'Hashtags'),
-                _buildButton(context, 'Posts'),
-                _buildButton(context, 'Events'),
-              ],
-            ),
-            SizedBox(height: 12),
-            // Horizontal Line
-            Divider(color: Colors.grey),
-            SizedBox(height: 12),
-            // People You May Know
-            Text(
-              "People You May Know",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
+              SizedBox(height: 12),
+              // Horizontal Line
+              Divider(color: Colors.grey),
+              SizedBox(height: 12),
+              // People You May Know
+              Text(
+                "People You May Know",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-            ),
-            SizedBox(height: 12),
-            // People List
-            _buildPersonRow(context, 'Person A', 'assets/Refined.jpg'),
-            SizedBox(height: 8), // Adding space between rows
-            _buildPersonRow(context, 'Person B', 'assets/MoonStuffs.jpg'),
-            SizedBox(height: 8), // Adding space between rows
-            _buildPersonRow(context, 'Person C', 'assets/CrowdMusicParty.jpg'),
-            SizedBox(height: 8), // Adding space between rows
-            _buildPersonRow(context, 'Person D', 'assets/RockBand.jpg'),
-            SizedBox(height: 8), // Adding space between rows
-            _buildPersonRow(context, 'Person E', 'assets/SkyGraffiti.jpg'),
-             SizedBox(height: 8), // Adding space between rows
-            _buildPersonRow(context, 'Person F', 'assets/SkyGraffiti.jpg'),
-             SizedBox(height: 8), // Adding space between rows
-            _buildPersonRow(context, 'Person G', 'assets/SkyGraffiti.jpg'),
-             SizedBox(height: 8), // Adding space between rows
-            _buildPersonRow(context, 'Person H', 'assets/SkyGraffiti.jpg'),
-             SizedBox(height: 8), // Adding space between rows
-            _buildPersonRow(context, 'Person I', 'assets/SkyGraffiti.jpg'),
-            _buildPersonRow(context, 'Person D', 'assets/RockBand.jpg'),
-            SizedBox(height: 8), // Adding space between rows
-            _buildPersonRow(context, 'Person E', 'assets/SkyGraffiti.jpg'),
-             SizedBox(height: 8), // Adding space between rows
-            _buildPersonRow(context, 'Person F', 'assets/SkyGraffiti.jpg'),
-             SizedBox(height: 8), // Adding space between rows
-            _buildPersonRow(context, 'Person G', 'assets/SkyGraffiti.jpg'),
-             SizedBox(height: 8), // Adding space between rows
-            _buildPersonRow(context, 'Person H', 'assets/SkyGraffiti.jpg'),
-             SizedBox(height: 8), // Adding space between rows
-            _buildPersonRow(context, 'Person I', 'assets/SkyGraffiti.jpg'),
-          ],
-        ),
+              SizedBox(height: 12),
+              // People List
+              ...friends.map((friend) => _buildPersonRow(context, friend)).toList(),
+            ],
+          ),
         ),
       ),
-      
     );
   }
 
@@ -174,18 +166,18 @@ padding: const EdgeInsets.all(8.0),
     );
   }
 
-  Widget _buildPersonRow(BuildContext context, String name, String imagePath) {
+  Widget _buildPersonRow(BuildContext context, Friend friend) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         children: [
           ClipOval(
-            child: Image.asset(imagePath, height: 40, width: 40, fit: BoxFit.cover),
+            child: Image.asset(friend.imagePath, height: 40, width: 40, fit: BoxFit.cover),
           ),
           SizedBox(width: 8),
           Expanded(
             child: Text(
-              name,
+              friend.name,
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.bold,
@@ -193,19 +185,45 @@ padding: const EdgeInsets.all(8.0),
             ),
           ),
           SizedBox(width: 8), // Adding space between circular image and buttons
-          _buildActionButton(context, "Add friends", Color(0xFF2646ED), Colors.white),
-          SizedBox(width: 8), // Adding space between buttons
-          _buildActionButton(context, "Remove", Color(0xFFF6F6F6), Colors.black),
+          if (!friend.requestSent) ...[
+            _buildActionButton(context, "Add friend", Color(0xFF2646ED), Colors.white, () {
+              setState(() {
+                friend.requestSent = true;
+              });
+            }),
+            SizedBox(width: 8), // Adding space between buttons
+            _buildActionButton(context, "Remove", Color(0xFFF6F6F6), Colors.black, () {
+              setState(() {
+                friends.remove(friend);
+              });
+            }),
+          ] else ...[
+            Column(
+              children: [
+                Text(
+                  "Request sent",
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
+                ),
+                SizedBox(height: 4),
+                _buildActionButton(context, "Cancel", Colors.red, Colors.white, () {
+                  setState(() {
+                    friend.requestSent = false;
+                  });
+                }),
+              ],
+            ),
+          ],
         ],
       ),
     );
   }
 
-  Widget _buildActionButton(BuildContext context, String title, Color backgroundColor, Color textColor) {
+  Widget _buildActionButton(BuildContext context, String title, Color backgroundColor, Color textColor, VoidCallback onPressed) {
     return ElevatedButton(
-      onPressed: () {
-        // Add your button action here
-      },
+      onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: backgroundColor,
         foregroundColor: textColor,
